@@ -1,0 +1,370 @@
+# 🔧 ClavelParts — Documento de Traspaso para Claude Code
+
+## CONTEXTO DEL PROYECTO
+
+**¿Qué es ClavelParts?**
+Marketplace especializado en autopartes para Argentina, con compatibilidad garantizada por modelo y versión de vehículo. El diferencial clave es que el usuario registra su auto y solo ve repuestos compatibles — eliminando el margen de error de comprar una pieza incorrecta.
+
+**Etapa actual:** MVP / prototipo en validación. El proyecto tiene una landing page funcional construida como un único archivo HTML que necesita ser modularizado y escalado.
+
+**Equipo:** Dos founders (Juampi — consultor de transformación digital con experiencia en tech; y un socio que maneja la parte comercial). Sin desarrolladores contratados todavía.
+
+---
+
+## IDENTIDAD Y BRANDING
+
+**Nombre provisional:** ClavelParts (en revisión — se están explorando alternativas como Desclavá, Garaje, Lapieza, Passt, Werk)
+
+**Tagline:** *"De Fierreros, Para Fierreros"*
+
+**Lema de producto:** *"No mostramos todo. Mostramos lo correcto."*
+
+**Paleta de colores:**
+```css
+--dark:      #141618;   /* fondo principal */
+--dark2:     #1c1f23;   /* topbar, cards */
+--dark3:     #22262b;   /* cards secundarias */
+--dark4:     #2a2f36;   /* bordes, inputs */
+--slate:     #3a4149;   /* navbar, botones secundarios */
+--slate2:    #4a5260;   /* hover states */
+--yellow:    #f0e040;   /* acento principal — CTA, precios, highlights */
+--white:     #ffffff;
+--gray:      #8a9299;   /* texto secundario */
+--gray2:     #c0c8d0;   /* texto nav */
+--light-bg:  #f2f3f5;   /* secciones claras */
+--text-dark: #1c1f23;   /* texto sobre fondo claro */
+```
+
+**Tipografía:**
+- Display/Títulos: `Barlow Condensed` (900, italic, uppercase) — da la actitud fierrera
+- Cuerpo: `Barlow` (400, 500, 600)
+- Google Fonts: `https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&family=Barlow:wght@400;500;600;700&display=swap`
+
+**Filosofía de diseño:**
+- Dark mode dominante (gris azulado oscuro — NO azul puro, NO mezclar azul con amarillo)
+- Amarillo como único acento fuerte
+- Tipografía condensada + itálica en titulares
+- Secciones que alternan entre dark y light para respirar
+- Sin mencionar a MercadoLibre en ningún lugar de la página
+
+---
+
+## ARQUITECTURA DEL PROTOTIPO ACTUAL
+
+El archivo actual (`clavelparts.html`) tiene 1352 líneas y está todo en un solo HTML. Necesita ser modularizado en un proyecto React o Next.js. A continuación la estructura de secciones que tiene:
+
+### Estructura de pantallas / vistas
+
+**Pantalla 1 — Home (landing)**
+1. **Topbar:** Logo + iconos MI GARAGE y CARRITO
+2. **Navbar:** Login + categorías (Aceites, Neumáticos, Llantas, Filtros, Frenos, Repuestos, NOS, Off Road, The Racers Edge)
+3. **Hero:** Split layout — izquierda: buscador por vehículo en cascada; derecha: headline + CTA
+4. **Carta fierrera:** Sección "De Fierreros, Para Fierreros" con formato de carta física
+5. **Catálogo por categorías:** Grid 6 columnas x 2 filas estilo Autodoc con iconos por categoría
+6. **Cómo funciona:** 3 cards con pasos numerados
+7. **Comunidad fierrera:** 4 cards (tutoriales, proyectos, noticias, garaje digital)
+8. **Lista de espera:** Formulario de email con selector comprador/vendedor
+9. **Footer**
+10. **Chatbot:** Burbuja flotante bottom-right con interfaz de chat
+
+**Pantalla 2 — Resultados de búsqueda**
+- Se activa al hacer click en "Ver repuestos compatibles" en el hero
+- Layout: sidebar de filtros izquierda + grilla de productos derecha
+- Filtros: categoría, marca, tipo (OEM/aftermarket/NOS)
+- Cards de productos con: imagen SVG, badge "COMPATIBLE CON TU VEHÍCULO", nombre, marca+ref, precio, vendedor con stars rating
+- Botón "+ Agregar" en cada card que agrega al carrito
+
+**Pantalla 3 — Carrito**
+- Se activa al click en botón flotante "Ver carrito"
+- Layout: lista de items izquierda + sidebar resumen derecha
+- Cada item: imagen, compatibilidad, nombre, marca/ref, vendedor, plazo de entrega, qty ajustable, precio
+- Sidebar: subtotal, envío gratis, garantía compatibilidad, total, desglose por vendedor, estimación de entrega consolidada, botón checkout
+
+### Buscador en cascada (Hero)
+```
+Marca → Modelo → Motor/Versión → Año → [mostrar foto del auto] → Botón "Ver Repuestos"
+```
+Datos de demo disponibles:
+- **BMW** → Serie 1 → 130i M Sport Package 3.0L → 2009 (foto: BMW negro real embedida en base64)
+- **OPEL** → Frontera → 2.2 DTI (115 CV) 4x4 SUV → 2001 (imagen SVG ilustrativa)
+- También: Volkswagen (Gol Trend, Polo, Amarok), Toyota (Corolla, Hilux), Ford (Focus, Ranger), Renault (Logan, Duster), Chevrolet (Onix), Fiat (Cronos, Palio)
+
+---
+
+## MODELO DE NEGOCIO
+
+**Usuario comprador (Etapa 1):** Fierrero/entusiasta automotriz, 25-45 años, en proceso de restauración o mejora de su vehículo, conoce el mundo de las autopartes.
+
+**Usuario comprador (Etapa 2):** Cualquier dueño de auto, sin necesidad de conocimiento técnico.
+
+**Usuario vendedor:** Desarmaderos, distribuidores y vendedores chicos/medianos especializados en una o pocas marcas. Hoy venden en MercadoLibre pero están frustrados con las comisiones y la visibilidad.
+
+**Modelo de ingresos:**
+1. Comisión por venta: 8-12% (vs 22-37% total en ML)
+2. Suscripción vendedor: dashboard + analíticas + visibilidad
+3. Publicidad especializada: contextual al vehículo del usuario (futuro)
+
+**Métricas de validación objetivo:**
+- Conversión búsqueda→compra: >15% (vs 3-5% en marketplaces genéricos)
+- Devoluciones por incompatibilidad: <2% (vs 15-20% en ML)
+- Tiempo hasta la compra: <10 minutos (vs 45+ minutos)
+- NPS primeros 6 meses: >50
+
+---
+
+## DIFERENCIAL TÉCNICO
+
+**El core del producto es la base de datos de compatibilidad.** Estrategia:
+- Hay conversaciones avanzadas con proveedores de bases de datos de vehículos para Argentina
+- La referencia estándar internacional es TecDoc (europeo) y ACES/PIES (americano)
+- Catálogo estructurado por: Marca → Modelo → Versión → Motor → Año
+- Los vendedores cargan compatibilidad al publicar (validada contra la base)
+
+**Información técnica por producto:** código OEM, medidas, materiales — lo que hoy no está en ningún marketplace genérico.
+
+---
+
+## STACK TECNOLÓGICO SUGERIDO PARA MODULARIZACIÓN
+
+**Recomendación para siguiente etapa:**
+
+```
+Frontend:     Next.js 14 (App Router) + TypeScript
+Styling:      Tailwind CSS (con los CSS variables del diseño actual)
+Componentes:  shadcn/ui base, customizado al design system
+Estado:       Zustand (carrito, vehículo seleccionado)
+DB compat.:   PostgreSQL con estructura jerárquica marca/modelo/versión
+Backend:      Next.js API Routes o FastAPI
+Auth:         NextAuth.js
+Deploy:       Vercel
+```
+
+**Estructura de carpetas sugerida:**
+```
+clavelparts/
+├── app/
+│   ├── page.tsx              # Home / Landing
+│   ├── resultados/page.tsx   # Pantalla 2: resultados de búsqueda
+│   ├── carrito/page.tsx      # Pantalla 3: carrito
+│   └── layout.tsx
+├── components/
+│   ├── layout/
+│   │   ├── Topbar.tsx
+│   │   ├── Navbar.tsx
+│   │   └── Footer.tsx
+│   ├── hero/
+│   │   ├── HeroSection.tsx
+│   │   ├── VehicleSelector.tsx   # El buscador en cascada — componente clave
+│   │   └── CarPreview.tsx
+│   ├── catalog/
+│   │   ├── CategoryGrid.tsx
+│   │   └── CategoryCard.tsx
+│   ├── results/
+│   │   ├── ListingCard.tsx
+│   │   ├── FiltersPanel.tsx
+│   │   └── ResultsGrid.tsx
+│   ├── cart/
+│   │   ├── CartPage.tsx
+│   │   ├── CartItem.tsx
+│   │   └── OrderSummary.tsx
+│   ├── sections/
+│   │   ├── LetterSection.tsx     # "De Fierreros Para Fierreros"
+│   │   ├── HowItWorks.tsx
+│   │   ├── CommunitySection.tsx
+│   │   └── WaitlistSection.tsx
+│   └── ui/
+│       ├── ChatBot.tsx
+│       └── Toast.tsx
+├── lib/
+│   ├── vehicleData.ts        # Datos de marcas/modelos (a conectar con BD)
+│   └── cartStore.ts          # Estado del carrito con Zustand
+├── styles/
+│   └── globals.css           # Variables CSS del design system
+└── public/
+    └── cars/                 # Fotos de vehículos
+```
+
+---
+
+## COMPONENTE CRÍTICO: VehicleSelector
+
+Este es el corazón del producto. El selector en cascada que hace que todo funcione:
+
+```typescript
+// Lógica actual (del HTML, para portar a TypeScript)
+const carData = {
+  BMW: {
+    models: {
+      'SERIE 1': {
+        engines: ['116i 1.6L', '118i 2.0L', '120i 2.0L', '125i 3.0L', '130i M Sport Package 3.0L', '118d 2.0L', '120d 2.0L'],
+        years: ['2012', '2011', '2010', '2009', '2008', '2007']
+      },
+      'SERIE 3': { engines: ['318i 2.0L', '320i 2.0L', '325i 2.5L', '330i 3.0L', '335i 3.0L'], years: ['2015','2014','2013','2012','2011','2010'] },
+      // ...
+    }
+  },
+  OPEL: {
+    models: {
+      'FRONTERA': {
+        engines: ['2.2 DTI (115 CV) 4x4 SUV', '2.2i (136 CV) 4x4', '3.2i V6 (205 CV) 4x4', '2.0i (116 CV)'],
+        years: ['2003', '2002', '2001', '2000', '1999', '1998']
+      },
+    }
+  },
+  VOLKSWAGEN: {
+    models: {
+      'GOL TREND': { engines: ['1.6 GNC', '1.6 NAFTA', '1.0 MPI'], years: ['2022','2021','2020','2019','2018'] },
+      'POLO': { engines: ['1.6 MSI', '1.4 TSI'], years: ['2023','2022','2021','2020'] },
+      'AMAROK': { engines: ['2.0 TDI 4x2', '2.0 TDI 4x4', '3.0 TDI'], years: ['2023','2022','2021','2020'] },
+    }
+  },
+  // Toyota, Ford, Renault, Chevrolet, Fiat, Honda, Mercedes-Benz...
+}
+
+// Al completar los 4 campos → mostrar foto del auto + botón "Ver Repuestos Compatibles"
+// Al hacer click en el botón → navegar a /resultados?marca=BMW&modelo=SERIE1&motor=130i&anio=2009
+```
+
+---
+
+## DATOS DE DEMO (PRODUCTOS)
+
+Productos disponibles en la demo para BMW Serie 1 130i:
+
+```typescript
+const demoProducts = [
+  { id: '1', name: 'Pastillas de freno delanteras', brand: 'Brembo', ref: 'P06098', price: 28500, seller: 'Frenos del Sur', sellerRating: 5, delivery: '3-5', category: 'frenos' },
+  { id: '2', name: 'Filtro de aceite', brand: 'Bosch', ref: 'F026407006', price: 8200, seller: 'Auto Repuestos GBA', sellerRating: 5, delivery: '2-4', category: 'filtros' },
+  { id: '3', name: 'Amortiguador delantero (x1)', brand: 'Sachs', ref: '312 584', price: 54000, seller: 'Suspensiones Cañon', sellerRating: 4, delivery: '5-7', category: 'amortiguacion' },
+  { id: '4', name: 'Disco de freno delantero', brand: 'Brembo', ref: '09.C328.11', price: 42800, seller: 'Frenos del Sur', sellerRating: 5, delivery: '3-5', category: 'frenos' },
+  { id: '5', name: 'Filtro de aire', brand: 'Mahle', ref: 'LX 1804', price: 11400, seller: 'Auto Repuestos GBA', sellerRating: 5, delivery: '2-4', category: 'filtros' },
+  { id: '6', name: 'Kit de embrague completo', brand: 'Valeo', ref: '835067', price: 118000, seller: 'Importadora BSport', sellerRating: 4, delivery: '7-10', category: 'embrague' },
+]
+```
+
+---
+
+## CATEGORÍAS DEL CATÁLOGO
+
+```typescript
+const categories = [
+  { id: 'neumaticos', name: 'Neumáticos y llantas', emoji: '🛞' },
+  { id: 'frenos', name: 'Frenos', emoji: '🛑' },
+  { id: 'motor', name: 'Motor', emoji: '⚙️' },
+  { id: 'filtros', name: 'Filtros', emoji: '🔶' },
+  { id: 'amortiguacion', name: 'Amortiguación', emoji: '🌀' },
+  { id: 'embrague', name: 'Embrague', emoji: '⚡' },
+  { id: 'electrico', name: 'Sistema eléctrico', emoji: '🔋' },
+  { id: 'aceites', name: 'Aceites y líquidos', emoji: '🛢️' },
+  { id: 'correas', name: 'Correas y cadenas', emoji: '〰️' },
+  { id: 'carroceria', name: 'Carrocería', emoji: '🚘' },
+  { id: 'suspension', name: 'Suspensión', emoji: '🔩' },
+  { id: 'otros', name: 'Otras categorías', emoji: '📦' },
+]
+```
+
+---
+
+## FUNCIONALIDADES A DESARROLLAR (BACKLOG PRIORIZADO)
+
+### Fase 1 — MVP validación (ya prototipado en HTML)
+- [x] Landing con buscador por vehículo en cascada
+- [x] Pantalla de resultados con productos compatibles
+- [x] Carrito con resumen y desglose por vendedor
+- [x] Chatbot UI (interfaz sin backend)
+- [x] Lista de espera
+
+### Fase 2 — MVP funcional
+- [ ] Conexión con base de datos real de vehículos Argentina
+- [ ] Sistema de publicación para vendedores
+- [ ] Autenticación (comprador y vendedor)
+- [ ] Sistema de pagos (MercadoPago)
+- [ ] Checkout real
+- [ ] Panel del vendedor (carga de productos con compatibilidad)
+
+### Fase 3 — Comunidad
+- [ ] Sección de tutoriales técnicos por modelo
+- [ ] "Mi Garaje" — guardar vehículo y recibir alertas
+- [ ] Proyectos de usuarios (restauraciones)
+- [ ] Sistema de reseñas con validación de compra
+
+### Fase 4 — Escala
+- [ ] Notificaciones por email de liquidaciones por modelo
+- [ ] App móvil
+- [ ] Expansión de catálogo a camionetas y 4x4
+- [ ] Integración TecDoc para compatibilidad automática
+
+---
+
+## CONTEXTO ADICIONAL IMPORTANTE
+
+**Por qué esto puede funcionar:**
+- El problema es real y bien definido: "Comprar un repuesto correcto depende más de la suerte que de la información disponible"
+- MercadoLibre tiene 22-37% de costo total para el vendedor vs nuestros 10-15% estimados
+- El nicho automotriz tiene alta complejidad técnica que favorece a plataformas especializadas
+- La comunidad fierrera genera retención que ningún marketplace horizontal puede replicar
+
+**Hipótesis de valor:**
+- Para el comprador: "Encontrá el repuesto exacto para tu auto en minutos, no en horas. Sin dudas, sin errores, sin devoluciones."
+- Para el vendedor: "Vendé más pagando menos. Sin competir con algoritmos pagos, solo con tu producto y servicio."
+
+**Estado de validación:**
+- Conversaciones iniciadas con proveedores de base de datos de vehículos para Argentina
+- Conversaciones con potenciales vendedores del rubro
+- Landing page funcional con demo de 3 pantallas
+- Pitch deck v3 preparado para mostrar a potenciales inversores/mentores
+
+---
+
+## INSTRUCCIONES PARA CLAUDE CODE
+
+### Primer paso recomendado: Inicializar el proyecto
+
+```bash
+npx create-next-app@latest clavelparts --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
+cd clavelparts
+npm install zustand
+```
+
+### Configurar el design system en globals.css
+
+```css
+:root {
+  --dark:      #141618;
+  --dark2:     #1c1f23;
+  --dark3:     #22262b;
+  --dark4:     #2a2f36;
+  --slate:     #3a4149;
+  --slate2:    #4a5260;
+  --yellow:    #f0e040;
+  --white:     #ffffff;
+  --gray:      #8a9299;
+  --gray2:     #c0c8d0;
+  --light-bg:  #f2f3f5;
+  --text-dark: #1c1f23;
+}
+```
+
+### Lo más importante a preservar al portar el HTML
+
+1. **El buscador en cascada** (VehicleSelector) — es el diferencial UX más importante
+2. **La lógica del carrito** — especialmente el desglose por vendedor y la entrega consolidada
+3. **La sección "De Fierreros Para Fierreros"** — es el corazón emocional de la marca
+4. **El badge "COMPATIBLE CON TU VEHÍCULO"** en cada producto — el claim central del producto
+
+### El HTML de referencia está en:
+`/mnt/project/clavelparts.html` — 1352 líneas con todo el prototipo funcional actual.
+
+---
+
+## NOTAS FINALES
+
+- El nombre **ClavelParts** viene del concepto argentino de "clavo" para un auto difícil de reparar. El proyecto nació de la frustración real de los founders con encontrar repuestos.
+- El target inicial son los **fierreros** — entusiastas automotrices que se involucran en la restauración y mejora de sus autos.
+- Argentina tiene **13M+ autos en circulación** y un mercado de autopartes estimado en USD 2.800M.
+- El proyecto está en **etapa de validación** — el HTML es un prototipo para mostrar la visión y conseguir feedback, no un producto de producción.
+- El equipo es **no técnico en desarrollo web** — Claude Code va a ser el principal colaborador técnico del proyecto.
+
+---
+
+*Documento generado el 25/03/2026 — Proyecto ClavelParts v1.0 (prototipo)*

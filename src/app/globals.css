@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&family=Barlow:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --dark:      #141618;
+  --dark2:     #1c1f23;
+  --dark3:     #22262b;
+  --dark4:     #2a2f36;
+  --slate:     #3a4149;
+  --slate2:    #4a5260;
+  --yellow:    #f0e040;
+  --yellow2:   #e8d800;
+  --white:     #ffffff;
+  --gray:      #8a9299;
+  --gray2:     #c0c8d0;
+  --light-bg:  #f2f3f5;
+  --light-card:#ffffff;
+  --text-dark: #1c1f23;
+  --green:     #6ee7b7;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--dark);
+  color: var(--white);
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--dark2); }
+::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--slate2); }
+
+/* ── Select custom arrow ── */
+.select-arrow {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath fill='%233a4149' d='M5 7L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.1rem center;
+}
+
+/* ── Compat badge ── */
+.badge-compat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(110, 231, 183, 0.1);
+  border: 1px solid rgba(110, 231, 183, 0.3);
+  color: var(--green);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.6rem;
+  border-radius: 3px;
+}
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--slate);
+  color: var(--white);
+  padding: 0.7rem 1.5rem;
+  border-radius: 6px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  z-index: 600;
+  transition: transform 0.3s;
+  border-left: 3px solid var(--yellow);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Hero background grid ── */
+.hero-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 55px, rgba(58,65,73,0.12) 55px, rgba(58,65,73,0.12) 56px),
+    repeating-linear-gradient(90deg, transparent, transparent 55px, rgba(58,65,73,0.12) 55px, rgba(58,65,73,0.12) 56px);
+}
