@@ -1,11 +1,14 @@
 'use client'
 
+import { useAppStore } from '@/lib/cartStore'
+
 const navLinks = [
   'ACEITES', 'NEUMÁTICOS', 'LLANTAS', 'FILTROS',
   'FRENOS', 'REPUESTOS', 'NOS', 'OFF ROAD',
 ]
 
 export default function Navbar() {
+  const { setView } = useAppStore()
   return (
     <nav
       className="sticky z-[299] flex items-center px-10 border-b-2"
@@ -40,7 +43,7 @@ export default function Navbar() {
             {link}
           </a>
         ))}
-        <a href="#" className="nav-link nav-link-hl">
+        <a href="#" className="nav-link nav-link-hl" onClick={(e) => { e.preventDefault(); setView('racers-edge') }}>
           THE RACERS EDGE ⚡
         </a>
       </div>

@@ -36,8 +36,8 @@ interface AppState {
   clearVehicle: () => void
 
   // UI state
-  currentView: 'home' | 'results' | 'cart' | 'garage'
-  setView: (v: 'home' | 'results' | 'cart' | 'garage') => void
+  currentView: 'home' | 'results' | 'cart' | 'garage' | 'racers-edge'
+  setView: (v: 'home' | 'results' | 'cart' | 'garage' | 'racers-edge') => void
 }
 
 export const useAppStore = create<AppState>((set, get) => ({

@@ -21,3 +21,7 @@ npm-debug.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local folders
+clavelparts_gith/
+.claude/
