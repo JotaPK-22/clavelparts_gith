@@ -1,11 +1,14 @@
 'use client'
 
+import Link from 'next/link'
 import { useAppStore } from '@/lib/cartStore'
 
 const navLinks = [
   'ACEITES', 'NEUMÁTICOS', 'LLANTAS', 'FILTROS',
-  'FRENOS', 'REPUESTOS', 'NOS', 'OFF ROAD',
+  'FRENOS', 'NOS',
 ]
+
+const rightLinks = ['OFF ROAD Y OUTDOOR']
 
 export default function Navbar() {
   const { setView } = useAppStore()
@@ -15,8 +18,9 @@ export default function Navbar() {
       style={{ background: 'var(--slate)', top: 78, height: 48, borderColor: 'var(--dark)' }}
     >
       {/* Login */}
-      <div
-        className="flex items-center gap-[0.4rem] pr-5 mr-2 cursor-pointer transition-colors duration-200"
+      <Link
+        href="/login"
+        className="flex items-center gap-[0.4rem] pr-5 mr-2 transition-colors duration-200"
         style={{
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 700,
@@ -25,6 +29,7 @@ export default function Navbar() {
           color: 'var(--gray2)',
           textTransform: 'uppercase',
           borderRight: '1px solid rgba(255,255,255,0.09)',
+          textDecoration: 'none',
         }}
         onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--yellow)')}
         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--gray2)')}
@@ -34,7 +39,7 @@ export default function Navbar() {
           <circle cx="12" cy="7" r="4"/>
         </svg>
         INICIAR SESIÓN
-      </div>
+      </Link>
 
       {/* Category links */}
       <div className="flex items-center flex-1">
@@ -43,9 +48,21 @@ export default function Navbar() {
             {link}
           </a>
         ))}
-        <a href="#" className="nav-link nav-link-hl" onClick={(e) => { e.preventDefault(); setView('racers-edge') }}>
-          THE RACERS EDGE ⚡
-        </a>
+
+        <div className="ml-auto flex items-center">
+          {rightLinks.map((link) => (
+            <a key={link} href="#" className="nav-link">
+              {link}
+            </a>
+          ))}
+          <a
+            href="#"
+            className="nav-link nav-link-hl"
+            onClick={(e) => { e.preventDefault(); setView('racers-edge') }}
+          >
+            THE RACERS EDGE ⚡
+          </a>
+        </div>
       </div>
 
       <style jsx>{`
@@ -71,11 +88,16 @@ export default function Navbar() {
           color: var(--yellow);
         }
         .nav-link-hl {
-          background: var(--dark);
-          color: var(--yellow);
+          background: #e41d13 !important;
+          color: var(--white) !important;
+          justify-content: center;
+          text-align: center;
+          min-width: 182px;
+          border-right: none;
         }
         .nav-link-hl:hover {
-          background: var(--dark2);
+          background: #c81910 !important;
+          color: var(--white) !important;
         }
       `}</style>
     </nav>

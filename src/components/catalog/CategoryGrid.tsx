@@ -1,18 +1,20 @@
 'use client'
 
+import Image from 'next/image'
+
 const categories = [
-  { id: 'neumaticos',   name: 'Neumáticos y llantas', emoji: '🛞' },
-  { id: 'frenos',       name: 'Frenos',                emoji: '🛑' },
-  { id: 'motor',        name: 'Motor',                 emoji: '⚙️' },
-  { id: 'filtros',      name: 'Filtros',               emoji: '🔶' },
-  { id: 'amortiguacion',name: 'Amortiguación',         emoji: '🌀' },
-  { id: 'embrague',     name: 'Embrague',              emoji: '⚡' },
-  { id: 'electrico',    name: 'Sistema eléctrico',     emoji: '🔋' },
-  { id: 'aceites',      name: 'Aceites y líquidos',    emoji: '🛢️' },
-  { id: 'correas',      name: 'Correas y cadenas',     emoji: '〰️' },
-  { id: 'carroceria',   name: 'Carrocería',            emoji: '🚘' },
-  { id: 'suspension',   name: 'Suspensión',            emoji: '🔩' },
-  { id: 'otros',        name: 'Otras categorías',      emoji: '📦' },
+  { id: 'neumaticos',    name: 'Neumáticos y llantas', image: '/categories/neumaticos y llantas.png' },
+  { id: 'frenos',        name: 'Frenos',               image: '/categories/frenos.png' },
+  { id: 'motor',         name: 'Motor',                image: '/categories/motor.png' },
+  { id: 'filtros',       name: 'Filtros',              image: '/categories/lubricacion.png' },
+  { id: 'amortiguacion', name: 'Amortiguación',        image: '/categories/suspension.png' },
+  { id: 'embrague',      name: 'Embrague',             image: '/categories/embrague.png' },
+  { id: 'electrico',     name: 'Sistema eléctrico',    image: '/categories/electricidad.png' },
+  { id: 'aceites',       name: 'Aceites y líquidos',   image: '/categories/lubricacion.png' },
+  { id: 'correas',       name: 'Correas y cadenas',    image: '/categories/distribucion.png' },
+  { id: 'carroceria',    name: 'Carrocería',           image: '/categories/carroceria.png' },
+  { id: 'suspension',    name: 'Suspensión',           image: '/categories/suspension.png' },
+  { id: 'otros',         name: 'Otras categorías',     image: '/categories/otros.png' },
 ]
 
 export default function CategoryGrid() {
@@ -54,10 +56,16 @@ export default function CategoryGrid() {
             }}
           >
             <div
-              className="flex items-center justify-center"
-              style={{ fontSize: '3.5rem', height: 100, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.15))' }}
+              className="relative flex items-center justify-center overflow-hidden rounded-md"
+              style={{ height: 110, width: '100%', background: '#f8f9fb' }}
             >
-              {cat.emoji}
+              <Image
+                src={cat.image}
+                alt={cat.name}
+                fill
+                className="object-contain p-2"
+                sizes="(max-width: 768px) 50vw, 16vw"
+              />
             </div>
             <div className="w-[7px] h-[7px] rounded-full" style={{ background: 'var(--slate2)' }} />
             <div

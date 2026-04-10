@@ -1,25 +1,15 @@
 'use client'
 
+import Image from 'next/image'
 import { useAppStore } from '@/lib/cartStore'
 import type { CartProduct } from '@/lib/cartStore'
+import { getCategoryImage } from '@/lib/categoryImages'
 
 interface ListingCardProps {
   product: Omit<CartProduct, 'qty'>
   onAdded?: () => void
 }
 
-// Simple inline SVG placeholder images per category
-const categoryIcons: Record<string, string> = {
-  frenos:       '🛑',
-  filtros:      '🔶',
-  amortiguacion:'🌀',
-  embrague:     '⚡',
-  motor:        '⚙️',
-  suspension:   '🔩',
-  electrico:    '🔋',
-  aceites:      '🛢️',
-  default:      '🔧',
-}
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -31,7 +21,7 @@ function Stars({ rating }: { rating: number }) {
 
 export default function ListingCard({ product, onAdded }: ListingCardProps) {
   const { addToCart } = useAppStore()
-  const icon = categoryIcons[product.category] ?? categoryIcons.default
+  const imageSrc = product.image || getCategoryImage(product.category)
 
   function handleAdd() {
     addToCart(product)
@@ -53,10 +43,16 @@ export default function ListingCard({ product, onAdded }: ListingCardProps) {
     >
       {/* Image area */}
       <div
-        className="flex items-center justify-center overflow-hidden"
+        className="relative overflow-hidden"
         style={{ height: 160, background: 'var(--dark3)' }}
       >
-        <span style={{ fontSize: '4rem' }}>{icon}</span>
+        <Image
+          src={imageSrc}
+          alt={product.name}
+          fill
+          className="object-contain p-4"
+          sizes="(max-width: 768px) 100vw, 33vw"
+        />
       </div>
 
       {/* Body */}

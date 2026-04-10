@@ -10,6 +10,7 @@ export interface CartProduct {
   sellerRating: number
   delivery: string
   category: string
+  image?: string
   qty: number
 }
 
@@ -18,6 +19,8 @@ export interface SelectedVehicle {
   model: string
   engine: string
   year: string
+  versionLabel?: string
+  versionId?: number
 }
 
 interface AppState {
@@ -34,6 +37,11 @@ interface AppState {
   vehicle: SelectedVehicle | null
   setVehicle: (v: SelectedVehicle) => void
   clearVehicle: () => void
+
+  // Search state
+  searchQuery: string
+  setSearchQuery: (query: string) => void
+  clearSearchQuery: () => void
 
   // UI state
   currentView: 'home' | 'results' | 'cart' | 'garage' | 'racers-edge'
@@ -75,6 +83,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   vehicle: null,
   setVehicle: (v) => set({ vehicle: v }),
   clearVehicle: () => set({ vehicle: null }),
+
+  // ── Search ──
+  searchQuery: '',
+  setSearchQuery: (query) => set({ searchQuery: query.trim() }),
+  clearSearchQuery: () => set({ searchQuery: '' }),
 
   // ── UI ──
   currentView: 'home',
