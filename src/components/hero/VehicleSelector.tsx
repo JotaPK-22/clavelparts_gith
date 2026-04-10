@@ -1,27 +1,152 @@
-'use client'
-
-import { useState } from 'react'
-import { brands, getModels, getEngines, getYears, getCarImageUrl } from '@/lib/vehicleData'
+import { useState, useEffect } from 'react'
+import { getBrands, getModelsByBrand, getYearsByModel, getVersionsByModelAndYear, Brand, Model, Version } from '@/lib/supabaseVehicles'
+import { getCarImageUrl } from '@/lib/vehicleData'
 import { useAppStore } from '@/lib/cartStore'
 
 export default function VehicleSelector() {
-  const { setVehicle, setView } = useAppStore()
-  const [brand, setBrand]   = useState('')
-  const [model, setModel]   = useState('')
-  const [engine, setEngine] = useState('')
-  const [year, setYear]     = useState('')
+  const { setVehicle, clearVehicle, setView, setSearchQuery } = useAppStore()
+  const [brand, setBrand] = useState<Brand | null>(null)
+  const [model, setModel] = useState<Model | null>(null)
+  const [year, setYear] = useState<number | null>(null)
+  const [version, setVersion] = useState<Version | null>(null)
+  const [partQuery, setPartQuery] = useState('')
 
-  const models  = brand  ? getModels(brand)         : []
-  const engines = model  ? getEngines(brand, model)  : []
-  const years   = model  ? getYears(brand, model)    : []
+  // Estados para datos del Supabase
+  const [brands, setBrands] = useState<Brand[]>([])
+  const [models, setModels] = useState<Model[]>([])
+  const [years, setYears] = useState<number[]>([])
+  const [versions, setVersions] = useState<Version[]>([])
 
-  const isComplete   = brand && model && engine && year
-  // Imagin.studio image: appears from brand+model, updates live when year changes
-  const previewImage = model ? getCarImageUrl(brand, model, year || undefined) : null
+  // Estados de carga
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  function handleSearch() {
-    if (!isComplete) return
-    setVehicle({ brand, model, engine, year })
+  // Cargar marcas al montar el componente
+  useEffect(() => {
+    const loadBrands = async () => {
+      try {
+        setLoading(true)
+        const brandsList = await getBrands()
+        setBrands(brandsList)
+      } catch (err) {
+        setError('Error al cargar marcas')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadBrands()
+  }, [])
+
+  // Cargar modelos cuando cambia la marca
+  useEffect(() => {
+    if (!brand) {
+      setModels([])
+      setModel(null)
+      return
+    }
+
+    const loadModels = async () => {
+      try {
+        setLoading(true)
+        const modelsList = await getModelsByBrand(brand.id)
+        setModels(modelsList)
+        setModel(null)
+        setYears([])
+        setYear(null)
+        setVersions([])
+        setVersion(null)
+      } catch (err) {
+        setError('Error al cargar modelos')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadModels()
+  }, [brand])
+
+  // Cargar años cuando cambia el modelo
+  useEffect(() => {
+    if (!brand || !model) {
+      setYears([])
+      setYear(null)
+      return
+    }
+
+    const loadYears = async () => {
+      try {
+        setLoading(true)
+        const yearsList = await getYearsByModel(model.id)
+        setYears(yearsList)
+        setYear(null)
+        setVersions([])
+        setVersion(null)
+      } catch (err) {
+        setError('Error al cargar años')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadYears()
+  }, [brand, model])
+
+  // Cargar versiones cuando cambia el año
+  useEffect(() => {
+    if (!brand || !model || !year) {
+      setVersions([])
+      setVersion(null)
+      return
+    }
+
+    const loadVersions = async () => {
+      try {
+        setLoading(true)
+        const versionsList = await getVersionsByModelAndYear(model.id, year)
+        setVersions(versionsList)
+        setVersion(null)
+      } catch (err) {
+        setError('Error al cargar versiones')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadVersions()
+  }, [brand, model, year])
+
+  const isComplete = Boolean(brand && model && year && version)
+  const hasTextQuery = partQuery.trim().length >= 2
+
+  function syncSelectedVehicle() {
+    if (!brand || !model || !year || !version) return false
+
+    setVehicle({
+      brand: brand.nombre,
+      model: model.nombre,
+      engine: version.motor_codigo,
+      year: year.toString(),
+      versionLabel: version.version,
+      versionId: version.id,
+    })
+
+    return true
+  }
+
+  function handleVehicleSearch() {
+    if (!syncSelectedVehicle()) return
+    setSearchQuery(partQuery)
+    setView('results')
+  }
+
+  function handlePartSearch() {
+    const hasVehicle = syncSelectedVehicle()
+
+    if (!hasVehicle && !hasTextQuery) return
+    if (!hasVehicle) clearVehicle()
+
+    setSearchQuery(partQuery)
     setView('results')
   }
 
@@ -31,12 +156,19 @@ export default function VehicleSelector() {
     cursor-pointer transition-shadow duration-200 border-none
     text-[var(--text-dark)] bg-white select-arrow
     focus:outline-none focus:ring-2 focus:ring-[var(--yellow)]
+    disabled:opacity-50 disabled:cursor-not-allowed
   `
 
   return (
     <div
-      className="flex flex-col justify-center gap-[0.85rem] px-[1.8rem] py-8 border-r-2"
-      style={{ background: 'var(--dark3)', borderColor: 'var(--dark4)', width: 400, minHeight: 'calc(100vh - 126px)' }}
+      className="flex flex-col justify-start gap-[0.85rem] px-[1.8rem] py-8 border-r-2"
+      style={{
+        background: 'var(--dark3)',
+        borderColor: 'var(--dark4)',
+        width: 400,
+        height: '100%',
+        overflowY: 'auto',
+      }}
     >
       <p
         className="text-center font-condensed font-black italic uppercase text-white mb-1"
@@ -45,32 +177,75 @@ export default function VehicleSelector() {
         ¿QUÉ AUTO <span style={{ color: 'var(--yellow)' }}>TENÉS?</span>
       </p>
 
+      {error && (
+        <div className="p-3 rounded bg-red-500/20 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
+
       {/* Brand */}
-      <select className={selectClass} value={brand} onChange={(e) => { setBrand(e.target.value); setModel(''); setEngine(''); setYear('') }}>
-        <option value="">MARCA</option>
-        {brands.map((b) => <option key={b}>{b}</option>)}
+      <select
+        className={selectClass}
+        value={brand?.id || ''}
+        onChange={(e) => {
+          const selectedBrand = brands.find(b => b.id === parseInt(e.target.value))
+          setBrand(selectedBrand || null)
+        }}
+        disabled={loading}
+      >
+        <option value="">MARCA {loading && '(Cargando...)'}</option>
+        {brands.map((b) => (
+          <option key={b.id} value={b.id}>{b.nombre}</option>
+        ))}
       </select>
 
       {/* Model */}
-      <select className={selectClass} value={model} disabled={!brand} onChange={(e) => { setModel(e.target.value); setEngine(''); setYear('') }}>
-        <option value="">MODELO</option>
-        {models.map((m) => <option key={m}>{m}</option>)}
-      </select>
-
-      {/* Engine/Version */}
-      <select className={selectClass} value={engine} disabled={!model} onChange={(e) => { setEngine(e.target.value); setYear('') }}>
-        <option value="">MOTOR / VERSIÓN</option>
-        {engines.map((eng) => <option key={eng}>{eng}</option>)}
+      <select
+        className={selectClass}
+        value={model?.id || ''}
+        onChange={(e) => {
+          const selectedModel = models.find(m => m.id === parseInt(e.target.value))
+          setModel(selectedModel || null)
+        }}
+        disabled={!brand || loading}
+      >
+        <option value="">MODELO {loading && '(Cargando...)'}</option>
+        {models.map((m) => (
+          <option key={m.id} value={m.id}>{m.nombre}</option>
+        ))}
       </select>
 
       {/* Year */}
-      <select className={selectClass} value={year} disabled={!engine} onChange={(e) => setYear(e.target.value)}>
-        <option value="">AÑO</option>
-        {years.map((y) => <option key={y}>{y}</option>)}
+      <select
+        className={selectClass}
+        value={year || ''}
+        onChange={(e) => setYear(parseInt(e.target.value) || null)}
+        disabled={!model || loading}
+      >
+        <option value="">AÑO {loading && '(Cargando...)'}</option>
+        {years.map((y) => (
+          <option key={y} value={y}>{y}</option>
+        ))}
+      </select>
+
+      {/* Version */}
+      <select
+        className={selectClass}
+        value={version?.id || ''}
+        onChange={(e) => {
+          const selectedVersion = versions.find(v => v.id === parseInt(e.target.value))
+          setVersion(selectedVersion || null)
+        }}
+        disabled={!year || loading}
+      >
+        <option value="">VERSIÓN {loading && '(Cargando...)'}</option>
+        {versions.map((v) => (
+          <option key={v.id} value={v.id}>{v.version}</option>
+        ))}
       </select>
 
       {/* Car preview — appears once brand+model are selected */}
-      {previewImage && (
+      {model && (
         <div
           className="rounded-lg overflow-hidden border transition-all duration-300"
           style={{ background: '#fff', borderColor: 'rgba(255,255,255,0.12)' }}
@@ -78,8 +253,8 @@ export default function VehicleSelector() {
           {/* White-bg car image (Imagin.studio or local photo) */}
           <div style={{ background: '#f5f5f5', position: 'relative' }}>
             <img
-              src={previewImage}
-              alt={`${brand} ${model}`}
+              src={getCarImageUrl(brand!.nombre, model.nombre, year?.toString())}
+              alt={`${brand!.nombre} ${model.nombre}`}
               style={{
                 width: '100%',
                 height: 160,
@@ -95,42 +270,39 @@ export default function VehicleSelector() {
           </div>
           <div className="px-4 py-3 font-condensed" style={{ background: 'var(--dark4)' }}>
             <div className="font-extrabold uppercase tracking-[0.05em]" style={{ fontSize: '1rem', color: 'var(--yellow)' }}>
-              {brand} {model}
+              {brand!.nombre} {model.nombre}
             </div>
-            {(engine || year) && (
+            {(version || year) && (
               <div className="mt-0.5" style={{ fontSize: '0.82rem', color: 'var(--gray)' }}>
-                {[engine, year].filter(Boolean).join(' · ')}
+                {[version?.version, year].filter(Boolean).join(' · ')}
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* CTA */}
-      {isComplete && (
-        <button
-          onClick={handleSearch}
-          className="w-full flex items-center justify-center gap-2 rounded-full font-condensed font-black italic uppercase transition-all duration-150 mt-1"
-          style={{
-            padding: '0.85rem 1.1rem',
-            background: 'var(--yellow)',
-            color: 'var(--text-dark)',
-            fontSize: '1.1rem',
-            letterSpacing: '0.08em',
-            border: 'none',
-            cursor: 'pointer',
-            boxShadow: '0 4px 18px rgba(240,224,64,0.3)',
-          }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)' }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'none' }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-[18px] h-[18px]">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          VER REPUESTOS COMPATIBLES
-        </button>
-      )}
+      <button
+        onClick={handleVehicleSearch}
+        disabled={!isComplete || loading}
+        className="w-full flex items-center justify-center gap-2 rounded-full font-condensed font-black italic uppercase transition-all duration-150 mt-1"
+        style={{
+          padding: '0.85rem 1.1rem',
+          background: isComplete && !loading ? 'var(--yellow)' : '#999',
+          color: isComplete && !loading ? 'var(--text-dark)' : '#666',
+          fontSize: '1.1rem',
+          letterSpacing: '0.08em',
+          border: 'none',
+          cursor: isComplete && !loading ? 'pointer' : 'not-allowed',
+          boxShadow: '0 4px 18px rgba(240,224,64,0.3)',
+          opacity: isComplete && !loading ? 1 : 0.7,
+        }}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-[18px] h-[18px]">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        {loading ? 'CARGANDO...' : isComplete ? 'VER REPUESTOS COMPATIBLES' : 'COMPLETÁ TU AUTO'}
+      </button>
 
       {/* Divider */}
       <div className="flex items-center gap-2 my-1">
@@ -144,12 +316,19 @@ export default function VehicleSelector() {
       {/* Text search */}
       <input
         type="text"
+        value={partQuery}
         placeholder="Introducí el nombre o número de pieza…"
         className="w-full px-[1.1rem] py-[0.78rem] rounded-full font-barlow text-[0.9rem] transition-all duration-200 focus:outline-none"
         style={{
           background: 'var(--dark4)',
           border: '1px solid var(--slate)',
           color: 'var(--white)',
+        }}
+        onChange={(e) => setPartQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !loading && (hasTextQuery || isComplete)) {
+            handlePartSearch()
+          }
         }}
         onFocus={(e) => {
           e.target.style.borderColor = 'var(--yellow)'
@@ -162,15 +341,18 @@ export default function VehicleSelector() {
       />
 
       <button
+        onClick={handlePartSearch}
+        disabled={(!hasTextQuery && !isComplete) || loading}
         className="w-full flex items-center justify-center gap-2 rounded-full font-condensed font-black italic uppercase transition-all duration-200"
         style={{
           padding: '0.85rem 1.1rem',
-          background: 'var(--slate)',
+          background: hasTextQuery || isComplete ? 'var(--slate)' : '#444',
           color: 'var(--white)',
           fontSize: '1.1rem',
           letterSpacing: '0.08em',
           border: 'none',
-          cursor: 'pointer',
+          cursor: hasTextQuery || isComplete ? 'pointer' : 'not-allowed',
+          opacity: hasTextQuery || isComplete ? 1 : 0.65,
         }}
         onMouseEnter={(e) => {
           (e.currentTarget as HTMLButtonElement).style.background = 'var(--slate2)'
@@ -185,7 +367,7 @@ export default function VehicleSelector() {
           <circle cx="11" cy="11" r="8"/>
           <line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        BUSCAR REPUESTO
+        {hasTextQuery ? 'BUSCAR POR NOMBRE O CÓDIGO' : isComplete ? 'BUSCAR REPUESTO' : 'ESCRIBÍ O SELECCIONÁ TU AUTO'}
       </button>
 
       <p className="text-center italic leading-[1.4]" style={{ fontSize: '0.75rem', color: 'var(--gray)' }}>

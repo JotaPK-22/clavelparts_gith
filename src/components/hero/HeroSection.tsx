@@ -1,51 +1,93 @@
 'use client'
 
+import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import VehicleSelector from './VehicleSelector'
 
+const heroSlides = [
+  { id: 'slide-1', image: '/hero/slide-1.png' },
+  { id: 'slide-2', image: '/hero/slide-2.png' },
+  { id: 'slide-3', image: '/hero/slide-3.png' },
+  { id: 'slide-4', image: '/hero/slide-4.png' },
+] as const
+
 export default function HeroSection() {
+  const [activeSlide, setActiveSlide] = useState(0)
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % heroSlides.length)
+    }, 10000)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
+
   return (
     <section
-      className="grid"
       style={{
-        gridTemplateColumns: '400px 1fr',
+        display: 'grid',
+        overflow: 'hidden',
+        gridTemplateColumns: '400px minmax(0, 1fr)',
         minHeight: 'calc(100vh - 126px)',
+        height: 'calc(100vh - 126px)',
       }}
     >
       {/* LEFT — Vehicle selector */}
       <VehicleSelector />
 
       {/* RIGHT — Visual */}
-      <div className="relative overflow-hidden flex flex-col justify-end">
-        {/* Background */}
+      <div
+        style={{
+          position: 'relative',
+          minWidth: 0,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+        }}
+      >
         <div
           className="absolute inset-0"
           style={{ background: 'linear-gradient(135deg, #0c0e10 0%, #141a22 55%, #0f1419 100%)' }}
         />
-        <div className="hero-bg-grid absolute inset-0" />
 
-        {/* Ghost car SVG */}
-        <svg
-          viewBox="0 0 900 380"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="absolute"
-          style={{ right: '-3%', bottom: '15%', width: '68%', opacity: 0.13 }}
-        >
-          <path d="M50 280 Q80 180 200 140 L380 100 L560 100 L720 140 Q840 180 860 280 L860 320 L50 320 Z" fill="white"/>
-          <ellipse cx="220" cy="320" rx="80" ry="80" fill="white"/>
-          <ellipse cx="680" cy="320" rx="80" ry="80" fill="white"/>
-          <ellipse cx="220" cy="320" rx="40" ry="40" fill="#333"/>
-          <ellipse cx="680" cy="320" rx="40" ry="40" fill="#333"/>
-          <rect x="220" y="112" width="150" height="85" rx="12" fill="#aaa" opacity="0.5"/>
-          <rect x="390" y="112" width="200" height="85" rx="12" fill="#aaa" opacity="0.5"/>
-          <rect x="60" y="255" width="120" height="35" rx="6" fill="#f0e040" opacity="0.6"/>
-          <rect x="720" y="255" width="120" height="35" rx="6" fill="#f0e040" opacity="0.4"/>
-        </svg>
-
-        {/* Overlay + text */}
         <div
-          className="relative z-[2] px-[3.2rem] pb-[2.8rem] pt-12"
-          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.25) 65%, transparent 100%)' }}
+          key={heroSlides[activeSlide].id}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            transition: 'opacity 700ms ease',
+          }}
+        >
+          <Image
+            src={heroSlides[activeSlide].image}
+            alt={`Slide promocional ${activeSlide + 1} de ClavelParts`}
+            fill
+            priority={activeSlide === 0}
+            className="object-cover"
+            sizes="(max-width: 1200px) 100vw, 70vw"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(90deg, rgba(10,12,14,0.8) 0%, rgba(10,12,14,0.5) 45%, rgba(10,12,14,0.72) 100%)',
+            }}
+          />
+        </div>
+
+        <div className="hero-bg-grid" style={{ position: 'absolute', inset: 0, opacity: 0.14 }} />
+
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            paddingLeft: '3.2rem',
+            paddingRight: '3.2rem',
+            paddingTop: '3rem',
+            paddingBottom: '2.8rem',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.25) 65%, transparent 100%)',
+          }}
         >
           <span
             className="inline-block font-condensed font-bold uppercase mb-[1.1rem]"
@@ -111,13 +153,30 @@ export default function HeroSection() {
           </a>
         </div>
 
-        {/* Dots */}
-        <div className="absolute bottom-7 right-[3.2rem] z-[3] flex gap-[0.45rem]">
-          {[true, false, false].map((active, i) => (
-            <div
+        <div
+          style={{
+            position: 'absolute',
+            right: '3.2rem',
+            bottom: '1.75rem',
+            zIndex: 3,
+            display: 'flex',
+            gap: '0.45rem',
+          }}
+        >
+          {heroSlides.map((_, i) => (
+            <button
               key={i}
-              className="w-[9px] h-[9px] rounded-full cursor-pointer transition-colors duration-200"
-              style={{ background: active ? 'var(--white)' : 'rgba(255,255,255,0.21)' }}
+              type="button"
+              aria-label={`Ir al slide ${i + 1}`}
+              onClick={() => setActiveSlide(i)}
+              style={{
+                width: 9,
+                height: 9,
+                borderRadius: '999px',
+                cursor: 'pointer',
+                border: 'none',
+                background: activeSlide === i ? 'var(--white)' : 'rgba(255,255,255,0.21)',
+              }}
             />
           ))}
         </div>
