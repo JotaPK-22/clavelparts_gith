@@ -207,7 +207,7 @@ export default function PanelVendedorPage() {
                     {item.imagen_url ? (
                       <img
                         src={item.imagen_url}
-                        alt={item.producto}
+                        alt={item.nombre}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     ) : (
@@ -219,7 +219,7 @@ export default function PanelVendedorPage() {
 
                   <div className="p-4">
                     <div className="mb-2 font-condensed font-black uppercase" style={{ color: 'var(--white)', fontSize: '1.05rem', lineHeight: 1.1 }}>
-                      {item.producto}
+                      {item.nombre}
                     </div>
 
                     <div className="mb-3 text-sm" style={{ color: 'var(--gray2)' }}>

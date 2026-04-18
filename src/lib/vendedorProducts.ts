@@ -18,7 +18,7 @@ export interface NuevoProductoInput {
 export interface ProductoVendedorResumen {
   id: number
   sku: string
-  producto: string
+  nombre: string
   marca_pieza?: string | null
   imagen_url?: string | null
   precio: number | null
@@ -44,7 +44,7 @@ export async function getProductosVendedorActual() {
     const supabase = createClient()
     const { data, error } = await supabase
       .from('productos')
-      .select('id, sku, producto, marca_pieza, imagen_url, precio, stock, activo')
+      .select('id, sku, nombre, marca_pieza, precio, stock, activo')
       .eq('vendedor_id', vendedor.id)
       .order('id', { ascending: false })
 
