@@ -16,9 +16,19 @@ import CarSidebar  from './CarSidebar'
 import GaragePanel from './GaragePanel'
 import AddCarModal  from './AddCarModal'
 
+function vehicleMatches(garageVehicle: GarageVehicle, storeVehicle: { brand?: string; model?: string; year?: string; engine?: string } | null | undefined) {
+  if (!storeVehicle) return false
+  return (
+    garageVehicle.brand === storeVehicle.brand &&
+    garageVehicle.model === storeVehicle.model &&
+    garageVehicle.year === storeVehicle.year &&
+    garageVehicle.engine === storeVehicle.engine
+  )
+}
+
 export default function GaragePage() {
   const router = useRouter()
-  const { setVehicle, clearVehicle, clearSearchQuery } = useAppStore()
+  const { vehicle: storeVehicle, setVehicle, clearVehicle, clearSearchQuery } = useAppStore()
   const [user,      setUser]      = useState<User | null>(null)
   const [vehicles,  setVehicles]  = useState<GarageVehicle[]>([])
   const [stats,     setStats]     = useState<GarageStats>({ vehiclesCount: 0, favoritesCount: 0, alertsUnreadCount: 0 })
@@ -60,9 +70,18 @@ export default function GaragePage() {
       if (cancelled) return
       setVehicles(vehiclesData)
       setStats(statsData)
-      const nextActiveCar = vehiclesData[0] ?? null
+
+      // Respetar la selección previa del store si coincide con un auto del garage.
+      // Solo si no hay match, caer al primero del listado.
+      const matchedCar = vehiclesData.find((v) => vehicleMatches(v, storeVehicle)) ?? null
+      const nextActiveCar = matchedCar ?? vehiclesData[0] ?? null
       setActiveCar(nextActiveCar)
-      syncSelectedVehicle(nextActiveCar)
+
+      // Si ya había match con el store, no pisamos el vehicle global.
+      // Si no había match y caemos al primero, sí sincronizamos.
+      if (!matchedCar) {
+        syncSelectedVehicle(nextActiveCar)
+      }
       setLoading(false)
     }
 
