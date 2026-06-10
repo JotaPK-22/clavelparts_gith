@@ -1,8 +1,10 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/lib/cartStore'
 
 export default function OrderSummary() {
+  const router = useRouter()
   const { cart, cartTotal } = useAppStore()
 
   // Group by seller
@@ -121,25 +123,29 @@ export default function OrderSummary() {
 
         {/* Checkout CTA */}
         <button
+          type="button"
+          onClick={() => router.push('/checkout')}
+          disabled={cart.length === 0}
           className="w-full font-condensed font-black italic uppercase transition-all duration-150"
           style={{
             padding: '1rem',
-            background: 'var(--yellow)',
-            color: 'var(--text-dark)',
+            background: cart.length === 0 ? 'var(--dark3)' : 'var(--yellow)',
+            color: cart.length === 0 ? 'var(--gray)' : 'var(--text-dark)',
             border: 'none',
             borderRadius: 6,
             fontSize: '1.2rem',
             letterSpacing: '0.08em',
-            cursor: 'pointer',
-            boxShadow: '0 4px 18px rgba(240,224,64,0.2)',
+            cursor: cart.length === 0 ? 'not-allowed' : 'pointer',
+            boxShadow: cart.length === 0 ? 'none' : '0 4px 18px rgba(240,224,64,0.2)',
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)'
+            if (cart.length === 0) return
+            ;(e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)'
             ;(e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 24px rgba(240,224,64,0.35)'
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.transform = 'none'
-            ;(e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 18px rgba(240,224,64,0.2)'
+            ;(e.currentTarget as HTMLButtonElement).style.transform = 'none'
+            ;(e.currentTarget as HTMLButtonElement).style.boxShadow = cart.length === 0 ? 'none' : '0 4px 18px rgba(240,224,64,0.2)'
           }}
         >
           FINALIZAR COMPRA →
