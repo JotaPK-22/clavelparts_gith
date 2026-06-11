@@ -64,7 +64,10 @@ export async function getCatalogProducts(
 ): Promise<CatalogProduct[]> {
   const normalizedSearch = searchQuery?.trim() ?? ''
 
-  if (!vehicle && !normalizedSearch) return []
+  // Antes hacíamos early-return [] cuando no había vehículo ni búsqueda.
+  // Ahora el usuario puede llegar a results desde el navbar o desde la
+  // grid de categorías SIN auto seleccionado — y debe ver todos los
+  // productos activos del catálogo (el filtro por categoría es en cliente).
 
   try {
     let query = supabase

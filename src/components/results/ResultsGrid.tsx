@@ -292,11 +292,8 @@ export default function ResultsGrid() {
 
   useEffect(() => {
     const loadProducts = async () => {
-      if (!vehicle && !searchQuery) {
-        setProducts([])
-        return
-      }
-
+      // Sin filtros (sin vehículo / sin búsqueda) traemos TODO el catálogo
+      // activo. El filtro por categoría sigue siendo en cliente.
       try {
         setLoading(true)
         setError(null)
