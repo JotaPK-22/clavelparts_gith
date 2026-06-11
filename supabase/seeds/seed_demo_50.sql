@@ -11,15 +11,20 @@
 --   - ~150 compatibilidades (cada producto con 2-5 vehículos)
 --   - 50 fotos (usando las imágenes de /categories/ que ya tiene el proyecto)
 --
--- IDEMPOTENTE: usa `on conflict do nothing` así podés correrlo varias veces.
--- No borra nada existente.
+-- IDEMPOTENTE: usa `where not exists (...)` en cada insert así podés
+-- correrlo varias veces sin duplicar. No borra nada existente.
+-- (Se evitan ON CONFLICT por si tu DB no tiene los unique constraints
+-- definidos en schema.sql.)
 
 ------------------------------------------------------------
 -- 1. MARCAS
 ------------------------------------------------------------
-insert into public.marcas (nombre) values
-  ('Toyota'), ('Ford'), ('Chevrolet'), ('Fiat'), ('Volkswagen')
-on conflict (nombre) do nothing;
+insert into public.marcas (nombre)
+select v.nombre
+from (values ('Toyota'), ('Ford'), ('Chevrolet'), ('Fiat'), ('Volkswagen')) as v(nombre)
+where not exists (
+  select 1 from public.marcas existing where existing.nombre = v.nombre
+);
 
 ------------------------------------------------------------
 -- 2. MODELOS (3 por marca, los más vendidos en AR)
@@ -44,7 +49,10 @@ join (values
   ('Volkswagen', 'Polo'),
   ('Volkswagen', 'Amarok')
 ) as mod(marca, nombre) on mod.marca = m.nombre
-on conflict (marca_id, nombre) do nothing;
+where not exists (
+  select 1 from public.modelos existing
+  where existing.marca_id = m.id and existing.nombre = mod.nombre
+);
 
 ------------------------------------------------------------
 -- 3. VERSIONES (1 por modelo)
@@ -71,19 +79,30 @@ join (values
   ('Volkswagen', 'Amarok',    2022, 'Highline V6',    '3.0 TDI')
 ) as v(marca, modelo, anio, version, motor_codigo)
   on v.marca = mc.nombre and v.modelo = md.nombre
-on conflict (modelo_id, anio, version, motor_codigo) do nothing;
+where not exists (
+  select 1 from public.versiones existing
+  where existing.modelo_id = md.id
+    and existing.anio = v.anio
+    and existing.version = v.version
+    and existing.motor_codigo = v.motor_codigo
+);
 
 ------------------------------------------------------------
 -- 4. GRUPOS
 ------------------------------------------------------------
-insert into public.grupos (nombre, orden) values
+insert into public.grupos (nombre, orden)
+select v.nombre, v.orden
+from (values
   ('Motor',                  1),
   ('Frenos',                 2),
   ('Suspensión y Dirección', 3),
   ('Eléctrico',              4),
   ('Carrocería',             5),
   ('Filtros',                6)
-on conflict (nombre) do nothing;
+) as v(nombre, orden)
+where not exists (
+  select 1 from public.grupos existing where existing.nombre = v.nombre
+);
 
 ------------------------------------------------------------
 -- 5. SUBGRUPOS
@@ -108,24 +127,32 @@ join (values
   ('Filtros',                'Combustible',               3),
   ('Carrocería',             'Ópticas',                   1)
 ) as s(grupo, subgrupo, orden) on s.grupo = g.nombre
-on conflict (grupo_id, nombre) do nothing;
+where not exists (
+  select 1 from public.subgrupos existing
+  where existing.grupo_id = g.id and existing.nombre = s.subgrupo
+);
 
 ------------------------------------------------------------
 -- 6. VENDEDORES FICTICIOS
 -- (UUIDs random — no pueden loguearse, son solo para mostrar)
 ------------------------------------------------------------
-insert into public.vendedores (auth_user_id, nombre, nombre_comercial, razon_social, email) values
-  (gen_random_uuid(), 'Centenario',       'Repuestos Centenario',     'Repuestos Centenario SRL',     'ventas@centenario.com.ar'),
-  (gen_random_uuid(), 'Belgrano Auto',    'AutoParts Belgrano',       'AutoParts Belgrano SA',        'info@autopartsbelgrano.com.ar'),
-  (gen_random_uuid(), 'Casa Repuesto',    'Casa del Repuesto',        'Casa del Repuesto SRL',        'pedidos@casarepuesto.com.ar'),
-  (gen_random_uuid(), 'La Esquina',       'Repuestera La Esquina',    'La Esquina Repuestos SRL',     'contacto@laesquinarep.com.ar'),
-  (gen_random_uuid(), 'MultiPiezas',      'MultiPiezas Norte',        'MultiPiezas Norte SA',         'hola@multipiezas.com.ar'),
-  (gen_random_uuid(), 'Pilar Repuestos',  'Repuestos del Pilar',      'Repuestos del Pilar SRL',      'ventas@pilarrep.com.ar'),
-  (gen_random_uuid(), 'Quilmes Auto',     'Auto Center Quilmes',      'Auto Center Quilmes SA',       'info@quilmesauto.com.ar'),
-  (gen_random_uuid(), 'Mendoza Rep',      'Repuestera Mendoza',       'Mendoza Repuestos SRL',        'ventas@mendozarep.com.ar'),
-  (gen_random_uuid(), 'CrossParts',       'CrossParts Córdoba',       'CrossParts Córdoba SA',        'info@crossparts.com.ar'),
-  (gen_random_uuid(), 'Río Cuarto Rep',   'Repuestos Río Cuarto',     'Río Cuarto Repuestos SRL',     'pedidos@riocuartorep.com.ar')
-on conflict (auth_user_id) do nothing;
+insert into public.vendedores (auth_user_id, nombre, nombre_comercial, razon_social, email)
+select gen_random_uuid(), v.nombre, v.nombre_comercial, v.razon_social, v.email
+from (values
+  ('Centenario',       'Repuestos Centenario',     'Repuestos Centenario SRL',     'ventas@centenario.com.ar'),
+  ('Belgrano Auto',    'AutoParts Belgrano',       'AutoParts Belgrano SA',        'info@autopartsbelgrano.com.ar'),
+  ('Casa Repuesto',    'Casa del Repuesto',        'Casa del Repuesto SRL',        'pedidos@casarepuesto.com.ar'),
+  ('La Esquina',       'Repuestera La Esquina',    'La Esquina Repuestos SRL',     'contacto@laesquinarep.com.ar'),
+  ('MultiPiezas',      'MultiPiezas Norte',        'MultiPiezas Norte SA',         'hola@multipiezas.com.ar'),
+  ('Pilar Repuestos',  'Repuestos del Pilar',      'Repuestos del Pilar SRL',      'ventas@pilarrep.com.ar'),
+  ('Quilmes Auto',     'Auto Center Quilmes',      'Auto Center Quilmes SA',       'info@quilmesauto.com.ar'),
+  ('Mendoza Rep',      'Repuestera Mendoza',       'Mendoza Repuestos SRL',        'ventas@mendozarep.com.ar'),
+  ('CrossParts',       'CrossParts Córdoba',       'CrossParts Córdoba SA',        'info@crossparts.com.ar'),
+  ('Río Cuarto Rep',   'Repuestos Río Cuarto',     'Río Cuarto Repuestos SRL',     'pedidos@riocuartorep.com.ar')
+) as v(nombre, nombre_comercial, razon_social, email)
+where not exists (
+  select 1 from public.vendedores existing where existing.email = v.email
+);
 
 ------------------------------------------------------------
 -- 7. PRODUCTOS (50)
@@ -218,7 +245,9 @@ from productos_data pd
 left join public.grupos    g  on g.nombre = pd.grupo
 left join public.subgrupos sg on sg.nombre = pd.subgrupo and sg.grupo_id = g.id
 left join public.vendedores v on v.nombre_comercial = pd.vendedor
-on conflict (sku) do nothing;
+where not exists (
+  select 1 from public.productos existing where existing.sku = pd.sku
+);
 
 ------------------------------------------------------------
 -- 8. COMPATIBILIDADES (cada producto con varios vehículos)
@@ -334,7 +363,10 @@ join public.productos p on p.sku = cm.sku
 join public.marcas    m on m.nombre = cm.marca
 join public.modelos   md on md.nombre = cm.modelo and md.marca_id = m.id
 join public.versiones v on v.modelo_id = md.id
-on conflict (producto_id, version_id) do nothing;
+where not exists (
+  select 1 from public.compatibilidades existing
+  where existing.producto_id = p.id and existing.version_id = v.id
+);
 
 ------------------------------------------------------------
 -- 9. FOTOS DE PRODUCTO (1 por producto, usando imagen_url)
