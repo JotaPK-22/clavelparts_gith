@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/lib/cartStore'
+import { supabase } from '@/lib/supabase'
 
 type Step = 1 | 2 | 3
 
@@ -97,13 +98,49 @@ export default function CheckoutPage() {
     setStep(2)
   }
 
-  function handleSubmitStep2(e: FormEvent) {
+  async function handleSubmitStep2(e: FormEvent) {
     e.preventDefault()
     setProcessing(true)
-    // Simulamos delay de procesamiento de pago
+
+    const order = generateOrderNumber()
+    const tracking = generateTrackingNumber()
+
+    // Persistimos en Supabase (tabla `pedidos_demo`). Si falla — porque
+    // la tabla no existe todavía, RLS o no hay conexión — igual mostramos
+    // confirmación al usuario y dejamos log en consola. La demo no se
+    // tiene que romper por un problema de backend.
+    try {
+      const payload = {
+        order_number: order,
+        nombre, apellido, email, telefono,
+        calle, numero, cp, ciudad, provincia,
+        items: cart.map((item) => ({
+          id: item.id,
+          name: item.name,
+          brand: item.brand,
+          seller: item.seller,
+          price: item.price,
+          qty: item.qty,
+          subtotal: item.price * item.qty,
+        })),
+        subtotal: total,
+        envio: 0,
+        total,
+        tracking_number: tracking,
+        is_demo: true,
+      }
+      const { error: insertError } = await supabase
+        .from('pedidos_demo')
+        .insert(payload)
+      if (insertError) {
+        console.warn('[checkout] No se pudo guardar el pedido en DB. Payload:', payload, insertError)
+      }
+    } catch (err) {
+      console.warn('[checkout] Error inesperado guardando pedido:', err)
+    }
+
+    // Simulamos delay de procesamiento de pago para sentir el "click → pago"
     setTimeout(() => {
-      const order = generateOrderNumber()
-      const tracking = generateTrackingNumber()
       setOrderNumber(order)
       setTrackingNumber(tracking)
       clearCart()

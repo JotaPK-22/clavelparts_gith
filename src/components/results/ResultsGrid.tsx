@@ -11,6 +11,7 @@ import Topbar from '@/components/layout/Topbar'
 import Navbar from '@/components/layout/Navbar'
 import FiltersPanel from './FiltersPanel'
 import ListingCard from './ListingCard'
+import RequestPartForm from './RequestPartForm'
 
 const MAIN_CATEGORIES = [
   { label: 'Motor', aliases: ['Motor'] },
@@ -303,7 +304,7 @@ export default function ResultsGrid() {
         setProducts(items)
       } catch (err) {
         console.error(err)
-        setError('No se pudieron cargar los repuestos desde Supabase.')
+        setError('No se pudieron cargar los repuestos. Probá de nuevo en unos segundos.')
       } finally {
         setLoading(false)
       }
@@ -428,10 +429,9 @@ export default function ResultsGrid() {
     : null
 
   function handleBack() {
-    if (typeof window !== 'undefined' && window.history.length > 1) {
-      router.back()
-      return
-    }
+    // Volver siempre al home — "Volver" en resultados conceptualmente
+    // significa "salir del listado", no "ir atrás en el historial".
+    // (router.back() podía mandar al panel de vendedor u otra ruta.)
     setView('home')
   }
 
@@ -549,7 +549,7 @@ export default function ResultsGrid() {
 
           {loading ? (
             <div className="rounded-md p-6" style={{ background: 'var(--light-card)', border: '1px solid #d9dde3', color: 'var(--text-dark)' }}>
-              Cargando repuestos desde Supabase...
+              Cargando repuestos compatibles…
             </div>
           ) : error ? (
             <div className="rounded-md p-6" style={{ background: 'rgba(220,38,38,0.1)', color: '#fca5a5' }}>
@@ -557,20 +557,21 @@ export default function ResultsGrid() {
             </div>
           ) : catalogProducts.length === 0 ? (
             vehicle ? (
-              <div className="flex items-center justify-center rounded-2xl p-10 text-center" style={{ minHeight: '55vh', background: 'linear-gradient(180deg, rgba(15,18,22,0.96) 0%, rgba(10,12,14,0.98) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ maxWidth: 720 }}>
-                  <div className="font-condensed font-black italic uppercase" style={{ color: 'var(--yellow)', fontSize: 'clamp(2rem, 4vw, 4rem)', lineHeight: 0.95, letterSpacing: '0.06em' }}>
-                    AÚN NO TENEMOS REPUESTOS
-                    <br />
-                    DISPONIBLES PARA TU MODELO
+              <div>
+                <div className="flex items-center justify-center rounded-2xl p-10 text-center" style={{ minHeight: '40vh', background: 'linear-gradient(180deg, rgba(15,18,22,0.96) 0%, rgba(10,12,14,0.98) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div style={{ maxWidth: 720 }}>
+                    <div className="font-condensed font-black italic uppercase" style={{ color: 'var(--yellow)', fontSize: 'clamp(1.6rem, 3.5vw, 3rem)', lineHeight: 0.95, letterSpacing: '0.06em' }}>
+                      AÚN NO TENEMOS REPUESTOS
+                      <br />
+                      DISPONIBLES PARA TU MODELO
+                    </div>
+                    <p className="mt-4" style={{ color: 'var(--gray2)', fontSize: '1rem', lineHeight: 1.6 }}>
+                      {noVehiclePartsMessage}
+                    </p>
                   </div>
-                  <p className="mt-5" style={{ color: 'var(--gray2)', fontSize: '1.05rem', lineHeight: 1.6 }}>
-                    {noVehiclePartsMessage}
-                  </p>
-                  <p className="mt-3" style={{ color: 'var(--gray)', fontSize: '0.95rem' }}>
-                    Estamos trabajando duro para sumar tu auto lo antes posible.
-                  </p>
                 </div>
+                {/* Formulario de solicitud */}
+                <RequestPartForm vehicle={vehicle} />
               </div>
             ) : (
               <div className="rounded-md p-6" style={{ background: 'var(--light-card)', border: '1px solid #d9dde3', color: 'var(--text-dark)' }}>

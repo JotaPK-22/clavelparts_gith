@@ -46,7 +46,7 @@ export default function VehicleSelector() {
 
       if (error) {
         setRows([])
-        setLoadError('No se pudieron cargar vehículos con productos desde Supabase.')
+        setLoadError('No se pudo cargar el catálogo. Probá de nuevo en unos segundos.')
         setLoading(false)
         return
       }
