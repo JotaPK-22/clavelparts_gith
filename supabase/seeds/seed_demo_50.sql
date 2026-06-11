@@ -17,6 +17,34 @@
 -- definidos en schema.sql.)
 
 ------------------------------------------------------------
+-- 0. ASEGURAR COLUMNAS (defensa contra schemas antiguos)
+-- Agrega columnas que necesitamos si no existen. Es idempotente.
+------------------------------------------------------------
+alter table public.vendedores
+  add column if not exists nombre            text,
+  add column if not exists nombre_comercial  text,
+  add column if not exists razon_social      text,
+  add column if not exists email             text;
+
+alter table public.productos
+  add column if not exists descripcion_corta text,
+  add column if not exists descripcion_larga text,
+  add column if not exists marca_pieza       text,
+  add column if not exists numero_parte_oem  text,
+  add column if not exists imagen_url        text,
+  add column if not exists vendedor          text,
+  add column if not exists vendedor_id       bigint,
+  add column if not exists grupo_id          bigint,
+  add column if not exists subgrupo_id       bigint,
+  add column if not exists activo            boolean not null default true;
+
+alter table public.grupos
+  add column if not exists orden integer not null default 100;
+
+alter table public.subgrupos
+  add column if not exists orden integer not null default 100;
+
+------------------------------------------------------------
 -- 1. MARCAS
 ------------------------------------------------------------
 insert into public.marcas (nombre)
