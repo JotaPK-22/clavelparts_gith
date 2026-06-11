@@ -2,13 +2,25 @@
 
 import { useState } from 'react'
 import { useAppStore } from '@/lib/cartStore'
+import { saveCatalogNavigationSnapshot } from '@/lib/catalogNavigationState'
 
-const navLinks = [
-  'ACEITES', 'NEUMÁTICOS', 'LLANTAS', 'FILTROS',
-  'FRENOS', 'DETAILING',
+type NavLink = {
+  label: string
+  group: string // label de MAIN_CATEGORIES de ResultsGrid
+}
+
+const navLinks: NavLink[] = [
+  { label: 'ACEITES',     group: 'Lubricación' },
+  { label: 'NEUMÁTICOS',  group: 'Ruedas y Neumáticos' },
+  { label: 'LLANTAS',     group: 'Ruedas y Neumáticos' },
+  { label: 'FILTROS',     group: 'Lubricación' },
+  { label: 'FRENOS',      group: 'Frenos' },
+  { label: 'DETAILING',   group: 'Accesorios' },
 ]
 
-const rightLinks = ['OFF ROAD Y OUTDOOR']
+const rightLinks: NavLink[] = [
+  { label: 'OFF ROAD Y OUTDOOR', group: 'TODOS' },
+]
 
 interface NavbarProps {
   isSticky?: boolean
@@ -16,8 +28,22 @@ interface NavbarProps {
 }
 
 export default function Navbar({ isSticky = true, transparent = false }: NavbarProps) {
-  const { setView } = useAppStore()
+  const { vehicle, searchQuery, setView } = useAppStore()
   const [menuOpen, setMenuOpen] = useState(false)
+
+  function goToCategory(group: string) {
+    saveCatalogNavigationSnapshot({
+      vehicle,
+      searchQuery,
+      selectedGroup: group,
+      selectedSubgroup: 'TODO',
+    })
+    setMenuOpen(false)
+    setView('results')
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'auto' })
+    }
+  }
 
   return (
     <nav
@@ -61,24 +87,34 @@ export default function Navbar({ isSticky = true, transparent = false }: NavbarP
       {/* Category links — hidden on mobile, shown via hamburger */}
       <div className="navbar-links flex items-center flex-1">
         {navLinks.map((link) => (
-          <a key={link} href="#" className="nav-link">
-            {link}
-          </a>
+          <button
+            key={link.label}
+            type="button"
+            onClick={() => goToCategory(link.group)}
+            className="nav-link"
+          >
+            {link.label}
+          </button>
         ))}
 
         <div className="ml-auto flex items-center">
           {rightLinks.map((link) => (
-            <a key={link} href="#" className="nav-link">
-              {link}
-            </a>
+            <button
+              key={link.label}
+              type="button"
+              onClick={() => goToCategory(link.group)}
+              className="nav-link"
+            >
+              {link.label}
+            </button>
           ))}
-          <a
-            href="#"
+          <button
+            type="button"
             className="nav-link nav-link-hl"
-            onClick={(e) => { e.preventDefault(); setView('racers-edge-home') }}
+            onClick={() => { setMenuOpen(false); setView('racers-edge-home') }}
           >
             THE RACER&apos;S EDGE
-          </a>
+          </button>
         </div>
       </div>
 
@@ -92,11 +128,14 @@ export default function Navbar({ isSticky = true, transparent = false }: NavbarP
           color: #fff;
           text-transform: uppercase;
           text-decoration: none;
+          background: transparent;
+          border: none;
+          border-right: 1px solid rgba(255,255,255,0.06);
           padding: 0 1.1rem;
           height: 48px;
           display: flex;
           align-items: center;
-          border-right: 1px solid rgba(255,255,255,0.06);
+          cursor: pointer;
           transition: background 0.15s, color 0.15s;
           white-space: nowrap;
           flex-shrink: 0;
