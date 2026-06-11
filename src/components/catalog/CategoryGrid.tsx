@@ -30,11 +30,13 @@ const categories: CategoryDef[] = [
 ]
 
 export default function CategoryGrid() {
-  const { vehicle, searchQuery, setView } = useAppStore()
+  const { vehicle, searchQuery, setView, setCatalogSelectedGroup, setCatalogSelectedSubgroup } = useAppStore()
 
   function goToCategory(group: string) {
-    // Guardamos el snapshot que ResultsGrid lee al montarse — eso
-    // pre-selecciona el grupo elegido sin reset del filtro
+    // Estado global → ResultsGrid lo observa inmediatamente
+    setCatalogSelectedGroup(group)
+    setCatalogSelectedSubgroup('TODO')
+    // Snapshot también — para persistencia entre refresh / volver desde detalle
     saveCatalogNavigationSnapshot({
       vehicle,
       searchQuery,
@@ -42,7 +44,6 @@ export default function CategoryGrid() {
       selectedSubgroup: 'TODO',
     })
     setView('results')
-    // Scroll arriba por si el header de results tiene anclaje
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'auto' })
     }

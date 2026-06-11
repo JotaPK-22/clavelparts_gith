@@ -47,6 +47,13 @@ interface AppState {
   currentView: 'home' | 'results' | 'cart' | 'garage' | 'racers-edge-home' | 'racers-edge-catalog'
   setView: (v: 'home' | 'results' | 'cart' | 'garage' | 'racers-edge-home' | 'racers-edge-catalog') => void
   syncViewFromUrl: () => void
+
+  // Catalog filter state — accesible global así Navbar/CategoryGrid pueden
+  // fijar el filtro desde fuera de ResultsGrid sin pasar por sessionStorage.
+  catalogSelectedGroup: string
+  catalogSelectedSubgroup: string
+  setCatalogSelectedGroup: (g: string) => void
+  setCatalogSelectedSubgroup: (s: string) => void
 }
 
 type AppView = 'home' | 'results' | 'cart' | 'garage' | 'racers-edge-home' | 'racers-edge-catalog'
@@ -128,6 +135,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     const view = (VALID_VIEWS as string[]).includes(raw ?? '') ? (raw as AppView) : 'home'
     set({ currentView: view })
   },
+
+  // ── Catalog filter ──
+  catalogSelectedGroup: 'TODOS',
+  catalogSelectedSubgroup: 'TODO',
+  setCatalogSelectedGroup: (g) => set({ catalogSelectedGroup: g }),
+  setCatalogSelectedSubgroup: (s) => set({ catalogSelectedSubgroup: s }),
 }))
 
 // ── Demo products (BMW Serie 1 130i 2009) ──

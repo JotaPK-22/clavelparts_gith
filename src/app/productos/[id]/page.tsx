@@ -43,7 +43,7 @@ const SELLER_TESTIMONIALS = [
 export default function DetalleProductoPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
-  const { addToCart, setView, setVehicle, clearVehicle, setSearchQuery, clearSearchQuery } = useAppStore()
+  const { addToCart, setView, setVehicle, clearVehicle, setSearchQuery, clearSearchQuery, setCatalogSelectedGroup, setCatalogSelectedSubgroup } = useAppStore()
   const id = params?.id ?? ''
   const [producto, setProducto] = useState<ProductDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -97,6 +97,8 @@ export default function DetalleProductoPage() {
       clearCatalogReturnQuery()
       if (snapshot?.vehicle) setVehicle(snapshot.vehicle); else clearVehicle()
       if (snapshot?.searchQuery) setSearchQuery(snapshot.searchQuery); else clearSearchQuery()
+      setCatalogSelectedGroup(snapshot?.selectedGroup || 'TODOS')
+      setCatalogSelectedSubgroup(snapshot?.selectedSubgroup || 'TODO')
       setView('results')
       router.replace('/')
       return

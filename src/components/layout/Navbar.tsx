@@ -28,10 +28,14 @@ interface NavbarProps {
 }
 
 export default function Navbar({ isSticky = true, transparent = false }: NavbarProps) {
-  const { vehicle, searchQuery, setView } = useAppStore()
+  const { vehicle, searchQuery, setView, setCatalogSelectedGroup, setCatalogSelectedSubgroup } = useAppStore()
   const [menuOpen, setMenuOpen] = useState(false)
 
   function goToCategory(group: string) {
+    // Estado global → ResultsGrid lo observa inmediatamente, incluso si ya está montado
+    setCatalogSelectedGroup(group)
+    setCatalogSelectedSubgroup('TODO')
+    // Snapshot también — para persistencia entre refresh / volver desde detalle
     saveCatalogNavigationSnapshot({
       vehicle,
       searchQuery,

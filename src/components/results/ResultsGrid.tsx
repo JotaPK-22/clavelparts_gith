@@ -272,23 +272,17 @@ function getCategoryDetail(category: string) {
 
 export default function ResultsGrid() {
   const router = useRouter()
-  const { vehicle, searchQuery, setView, cartCount } = useAppStore()
+  const {
+    vehicle, searchQuery, setView, cartCount,
+    catalogSelectedGroup: selectedGroup,
+    catalogSelectedSubgroup: selectedSubgroup,
+    setCatalogSelectedGroup: setSelectedGroup,
+    setCatalogSelectedSubgroup: setSelectedSubgroup,
+  } = useAppStore()
   const [toast, setToast] = useState(false)
   const [products, setProducts] = useState<CatalogProduct[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedGroup, setSelectedGroup] = useState('TODOS')
-  const [selectedSubgroup, setSelectedSubgroup] = useState(ALL_SUBGROUP)
-  const [skipNextReset, setSkipNextReset] = useState(false)
-
-  useEffect(() => {
-    const snapshot = readCatalogNavigationSnapshot()
-    if (!snapshot) return
-
-    setSelectedGroup(snapshot.selectedGroup || 'TODOS')
-    setSelectedSubgroup(snapshot.selectedSubgroup || ALL_SUBGROUP)
-    setSkipNextReset(true)
-  }, [])
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -310,19 +304,10 @@ export default function ResultsGrid() {
     loadProducts()
   }, [vehicle, searchQuery])
 
-  useEffect(() => {
-    if (skipNextReset) {
-      setSkipNextReset(false)
-      return
-    }
-
-    setSelectedGroup('TODOS')
-    setSelectedSubgroup(ALL_SUBGROUP)
-  }, [vehicle?.brand, vehicle?.model, vehicle?.year, vehicle?.engine, searchQuery, skipNextReset])
-
+  // Al cambiar de grupo, vaciar el subgrupo activo
   useEffect(() => {
     setSelectedSubgroup(ALL_SUBGROUP)
-  }, [selectedGroup])
+  }, [selectedGroup, setSelectedSubgroup])
 
   function showToast() {
     setToast(true)
