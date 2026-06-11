@@ -21,7 +21,7 @@ import RacersEdgePage   from '@/components/racers-edge/RacersEdgePage'
 import ChatBot          from '@/components/ui/ChatBot'
 
 export default function Home() {
-  const { currentView, setView, setVehicle, clearVehicle, setSearchQuery, clearSearchQuery } = useAppStore()
+  const { currentView, setView, setVehicle, clearVehicle, setSearchQuery, clearSearchQuery, syncViewFromUrl } = useAppStore()
 
   useEffect(() => {
     const shouldRestore = consumeCatalogNavigationPending() || hasCatalogReturnQuery()
@@ -45,6 +45,22 @@ export default function Home() {
 
     setView('results')
   }, [clearSearchQuery, clearVehicle, setSearchQuery, setVehicle, setView])
+
+  // ── Sincronización vista <-> URL (?view=XXX) ──
+  // Hace que el botón "atrás" del navegador funcione naturalmente entre
+  // vistas internas (home/results/cart/garage/etc). Cuando setView se llama,
+  // el store hace pushState; acá nos suscribimos al popstate del navegador
+  // para que back/forward actualicen la vista.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    // Al montar: si la URL ya tiene ?view=XXX, sincronizamos el store
+    syncViewFromUrl()
+
+    const handlePopState = () => syncViewFromUrl()
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [syncViewFromUrl])
 
   return (
     <>

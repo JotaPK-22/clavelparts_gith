@@ -46,6 +46,32 @@ interface AppState {
   // UI state
   currentView: 'home' | 'results' | 'cart' | 'garage' | 'racers-edge-home' | 'racers-edge-catalog'
   setView: (v: 'home' | 'results' | 'cart' | 'garage' | 'racers-edge-home' | 'racers-edge-catalog') => void
+  syncViewFromUrl: () => void
+}
+
+type AppView = 'home' | 'results' | 'cart' | 'garage' | 'racers-edge-home' | 'racers-edge-catalog'
+
+const VALID_VIEWS: AppView[] = ['home', 'results', 'cart', 'garage', 'racers-edge-home', 'racers-edge-catalog']
+
+// Empuja la vista actual a la URL (?view=results) si estamos en /.
+// Esto hace que el botón "atrás" del navegador funcione naturalmente
+// entre vistas internas. No toca nada si estamos en otra ruta.
+function pushUrlForView(v: AppView) {
+  if (typeof window === 'undefined') return
+  if (window.location.pathname !== '/') return
+
+  const params = new URLSearchParams(window.location.search)
+  if (v === 'home') {
+    params.delete('view')
+  } else {
+    params.set('view', v)
+  }
+  const search = params.toString()
+  const newUrl = search ? `/?${search}` : '/'
+  const currentUrl = window.location.pathname + window.location.search
+  if (newUrl !== currentUrl) {
+    window.history.pushState({ view: v }, '', newUrl)
+  }
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -91,7 +117,17 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   // ── UI ──
   currentView: 'home',
-  setView: (v) => set({ currentView: v }),
+  setView: (v) => {
+    set({ currentView: v })
+    pushUrlForView(v)
+  },
+  syncViewFromUrl: () => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const raw = params.get('view')
+    const view = (VALID_VIEWS as string[]).includes(raw ?? '') ? (raw as AppView) : 'home'
+    set({ currentView: view })
+  },
 }))
 
 // ── Demo products (BMW Serie 1 130i 2009) ──
