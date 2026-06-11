@@ -75,7 +75,7 @@ export default function Topbar({ isSticky = true, currentView }: TopbarProps) {
     await supabase.auth.signOut()
     setMenuOpen(false)
     setUser(null)
-    router.push('/')
+    router.replace('/')
   }
 
   return (

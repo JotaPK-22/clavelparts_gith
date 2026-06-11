@@ -151,7 +151,7 @@ export default function CheckoutPage() {
 
   function handleVolverHome() {
     setView('home')
-    router.push('/')
+    router.replace('/')
   }
 
   // ── Render ──────────────────────────────────────────────────
@@ -165,7 +165,7 @@ export default function CheckoutPage() {
             type="button"
             onClick={() => {
               setView('cart')
-              router.push('/')
+              router.replace('/')
             }}
             className="mb-5 inline-flex items-center gap-2 rounded-md px-3 py-2 font-condensed font-bold uppercase text-sm transition-colors"
             style={{

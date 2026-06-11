@@ -67,8 +67,8 @@ export default function RequestPartForm({ vehicle }: Props) {
       <div
         className="mt-8 rounded-2xl p-6 md:p-8 text-center"
         style={{
-          background: 'rgba(34,197,94,0.08)',
-          border: '1px solid rgba(34,197,94,0.3)',
+          background: 'var(--dark2)',
+          border: '1px solid var(--dark4)',
           maxWidth: 560,
           margin: '2rem auto 0',
         }}
@@ -77,17 +77,17 @@ export default function RequestPartForm({ vehicle }: Props) {
           className="mx-auto mb-4 flex items-center justify-center rounded-full"
           style={{
             width: 56, height: 56,
-            background: 'rgba(34,197,94,0.15)',
-            border: '2px solid #22c55e',
+            background: 'rgba(240,224,64,0.12)',
+            border: '2px solid var(--yellow)',
           }}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth={2.5} style={{ width: 28, height: 28 }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" strokeWidth={2.5} style={{ width: 28, height: 28 }}>
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
         <div
-          className="font-condensed font-extrabold uppercase mb-2"
-          style={{ color: 'var(--white)', fontSize: '1.2rem', letterSpacing: '0.04em' }}
+          className="font-condensed font-black italic uppercase mb-2"
+          style={{ color: 'var(--yellow)', fontSize: '1.3rem', letterSpacing: '0.04em' }}
         >
           ¡Listo! Te vamos a avisar
         </div>

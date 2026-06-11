@@ -98,11 +98,11 @@ export default function DetalleProductoPage() {
       if (snapshot?.vehicle) setVehicle(snapshot.vehicle); else clearVehicle()
       if (snapshot?.searchQuery) setSearchQuery(snapshot.searchQuery); else clearSearchQuery()
       setView('results')
-      router.push('/')
+      router.replace('/')
       return
     }
     // Si no, volvemos al home
-    router.push('/')
+    router.replace('/')
   }
 
   if (loading) {
@@ -130,7 +130,7 @@ export default function DetalleProductoPage() {
             El producto que buscás no existe o se eliminó del catálogo.
           </p>
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.replace('/')}
             className="rounded-md px-4 py-2 font-condensed font-bold uppercase"
             style={{ background: 'var(--yellow)', color: 'var(--text-dark)', cursor: 'pointer', border: 'none' }}
           >

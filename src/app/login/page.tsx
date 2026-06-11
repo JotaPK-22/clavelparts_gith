@@ -38,7 +38,7 @@ export default function LoginPage() {
         setError(error.message)
         return
       }
-      router.push('/')
+      router.replace('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo iniciar sesión.')
     } finally {

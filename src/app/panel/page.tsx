@@ -131,7 +131,7 @@ export default function PanelVendedorPage() {
           </p>
           <div className="flex gap-2">
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.replace('/')}
               className="rounded-md px-4 py-2 font-condensed font-bold uppercase"
               style={{ background: 'var(--yellow)', color: 'var(--text-dark)' }}
             >
@@ -157,7 +157,7 @@ export default function PanelVendedorPage() {
         {/* Volver al home */}
         <button
           type="button"
-          onClick={() => router.push('/')}
+          onClick={() => router.replace('/')}
           className="mb-5 inline-flex items-center gap-2 rounded-md px-3 py-2 font-condensed font-bold uppercase text-sm transition-colors"
           style={{
             background: 'transparent',

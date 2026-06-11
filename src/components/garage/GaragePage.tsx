@@ -106,7 +106,7 @@ export default function GaragePage() {
 
   async function handleLogout() {
     await supabase.auth.signOut()
-    router.push('/')
+    router.replace('/')
   }
 
   function handleCarAdded(car: GarageVehicle) {
