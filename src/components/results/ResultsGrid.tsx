@@ -340,7 +340,15 @@ export default function ResultsGrid() {
       }))
       .filter((category) => category.count > 0)
 
-    const knownNames = new Set<string>(known.map((item) => item.name))
+    // Una pieza con grupo='Filtros' bucketiza en 'Lubricación' por aliases;
+    // no querés ver 'Filtros' como card extra. Excluimos cualquier nombre
+    // que sea alias de un MAIN_CATEGORY, no solo los labels.
+    const knownNamesNormalized = new Set<string>()
+    MAIN_CATEGORIES.forEach((cat) => {
+      cat.aliases.forEach((alias) => knownNamesNormalized.add(normalizeValue(alias)))
+      knownNamesNormalized.add(normalizeValue(cat.label))
+    })
+
     const unknownGroups = Array.from(
       new Set(
         catalogProducts
@@ -348,7 +356,7 @@ export default function ResultsGrid() {
           .filter(Boolean)
       )
     )
-      .filter((groupName) => !knownNames.has(groupName))
+      .filter((groupName) => !knownNamesNormalized.has(normalizeValue(groupName)))
       .map((groupName) => ({
         name: groupName,
         count: catalogProducts.filter((product) => canonicalGroupName(product.group) === groupName).length,
@@ -363,15 +371,11 @@ export default function ResultsGrid() {
     [groupCards]
   )
 
-  useEffect(() => {
-    // No validar mientras el catálogo está cargando — sino reseteamos
-    // a 'TODOS' antes de que el fetch async termine y groups esté lleno
-    if (loading || catalogProducts.length === 0) return
-    if (selectedGroup !== 'TODOS' && !groups.includes(selectedGroup)) {
-      setSelectedGroup('TODOS')
-      setSelectedSubgroup(ALL_SUBGROUP)
-    }
-  }, [groups, selectedGroup, loading, catalogProducts.length, setSelectedGroup, setSelectedSubgroup])
+  // Sacamos el reset automático a 'TODOS' cuando selectedGroup no aparece en
+  // `groups`. Esto era el origen del bug por el cual clickear ACEITES /
+  // NEUMÁTICOS / LLANTAS / DETAILING (categorías sin productos en el seed)
+  // te devolvía a la grilla de categorías. Ahora mantenemos el filtro y
+  // dejamos que el empty state muestre el form "pedinos el repuesto".
 
   const subgroups = useMemo(() => {
     const filteredByGroup = selectedGroup === 'TODOS'
@@ -753,8 +757,30 @@ export default function ResultsGrid() {
               )}
 
               {filteredProducts.length === 0 ? (
-                <div className="rounded-md p-6" style={{ background: 'var(--light-card)', border: '1px solid #d9dde3', color: 'var(--text-dark)' }}>
-                  No hay repuestos cargados en esa subcategoría.
+                <div>
+                  <div
+                    className="flex items-center justify-center rounded-2xl p-8 text-center"
+                    style={{
+                      minHeight: '30vh',
+                      background: 'linear-gradient(180deg, rgba(15,18,22,0.96) 0%, rgba(10,12,14,0.98) 100%)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                  >
+                    <div style={{ maxWidth: 600 }}>
+                      <div
+                        className="font-condensed font-black italic uppercase mb-2"
+                        style={{ color: 'var(--yellow)', fontSize: 'clamp(1.4rem, 3vw, 2.2rem)', lineHeight: 1, letterSpacing: '0.06em' }}
+                      >
+                        AÚN NO TENEMOS REPUESTOS<br />EN {selectedGroup.toUpperCase()}
+                      </div>
+                      <p className="mt-3" style={{ color: 'var(--gray2)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                        {vehicle
+                          ? `Para ${vehicle.brand} ${vehicle.model} ${vehicle.year} todavía no hay piezas cargadas de esta categoría.`
+                          : 'Todavía no hay piezas cargadas en esta categoría.'}
+                      </p>
+                    </div>
+                  </div>
+                  <RequestPartForm vehicle={vehicle} />
                 </div>
               ) : (
                 <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>

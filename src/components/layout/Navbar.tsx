@@ -6,16 +6,17 @@ import { saveCatalogNavigationSnapshot } from '@/lib/catalogNavigationState'
 
 type NavLink = {
   label: string
-  group: string // label de MAIN_CATEGORIES de ResultsGrid
+  group: string         // label de MAIN_CATEGORIES de ResultsGrid
+  subgroup?: string     // si se especifica, se pre-selecciona también el subgrupo
 }
 
 const navLinks: NavLink[] = [
-  { label: 'ACEITES',     group: 'Lubricación' },
-  { label: 'NEUMÁTICOS',  group: 'Ruedas y Neumáticos' },
-  { label: 'LLANTAS',     group: 'Ruedas y Neumáticos' },
+  { label: 'ACEITES',     group: 'Lubricación',         subgroup: 'Aceite' },
+  { label: 'NEUMÁTICOS',  group: 'Ruedas y Neumáticos', subgroup: 'Neumáticos' },
+  { label: 'LLANTAS',     group: 'Ruedas y Neumáticos', subgroup: 'Llantas' },
   { label: 'FILTROS',     group: 'Lubricación' },
   { label: 'FRENOS',      group: 'Frenos' },
-  { label: 'DETAILING',   group: 'Accesorios' },
+  { label: 'DETAILING',   group: 'Accesorios',          subgroup: 'Detailing' },
 ]
 
 const rightLinks: NavLink[] = [
@@ -31,16 +32,16 @@ export default function Navbar({ isSticky = true, transparent = false }: NavbarP
   const { vehicle, searchQuery, setView, setCatalogSelectedGroup, setCatalogSelectedSubgroup } = useAppStore()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  function goToCategory(group: string) {
+  function goToCategory(group: string, subgroup: string = 'TODO') {
     // Estado global → ResultsGrid lo observa inmediatamente, incluso si ya está montado
     setCatalogSelectedGroup(group)
-    setCatalogSelectedSubgroup('TODO')
+    setCatalogSelectedSubgroup(subgroup)
     // Snapshot también — para persistencia entre refresh / volver desde detalle
     saveCatalogNavigationSnapshot({
       vehicle,
       searchQuery,
       selectedGroup: group,
-      selectedSubgroup: 'TODO',
+      selectedSubgroup: subgroup,
     })
     setMenuOpen(false)
     setView('results')
@@ -94,7 +95,7 @@ export default function Navbar({ isSticky = true, transparent = false }: NavbarP
           <button
             key={link.label}
             type="button"
-            onClick={() => goToCategory(link.group)}
+            onClick={() => goToCategory(link.group, link.subgroup)}
             className="nav-link"
           >
             {link.label}
@@ -106,7 +107,7 @@ export default function Navbar({ isSticky = true, transparent = false }: NavbarP
             <button
               key={link.label}
               type="button"
-              onClick={() => goToCategory(link.group)}
+              onClick={() => goToCategory(link.group, link.subgroup)}
               className="nav-link"
             >
               {link.label}
