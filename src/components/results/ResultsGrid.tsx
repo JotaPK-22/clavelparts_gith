@@ -648,6 +648,9 @@ export default function ResultsGrid() {
                 </div>
               </div>
 
+              {/* Card de detalle de categoría — ocultar si no hay productos
+                  para esa categoría (sino compite con el empty state) */}
+              {filteredProducts.length > 0 && (
               <div
                 className="rounded-xl border p-4 mb-6"
                 style={{ background: 'var(--light-card)', borderColor: '#d9dde3' }}
@@ -707,6 +710,7 @@ export default function ResultsGrid() {
                   </div>
                 </div>
               </div>
+              )}
 
               {subgroupCards.length > 0 && (
                 <div className="mb-8">
