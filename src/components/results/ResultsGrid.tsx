@@ -364,11 +364,14 @@ export default function ResultsGrid() {
   )
 
   useEffect(() => {
+    // No validar mientras el catálogo está cargando — sino reseteamos
+    // a 'TODOS' antes de que el fetch async termine y groups esté lleno
+    if (loading || catalogProducts.length === 0) return
     if (selectedGroup !== 'TODOS' && !groups.includes(selectedGroup)) {
       setSelectedGroup('TODOS')
       setSelectedSubgroup(ALL_SUBGROUP)
     }
-  }, [groups, selectedGroup])
+  }, [groups, selectedGroup, loading, catalogProducts.length, setSelectedGroup, setSelectedSubgroup])
 
   const subgroups = useMemo(() => {
     const filteredByGroup = selectedGroup === 'TODOS'
