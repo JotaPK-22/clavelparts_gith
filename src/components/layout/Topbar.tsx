@@ -144,7 +144,7 @@ export default function Topbar({ isSticky = true, currentView }: TopbarProps) {
         <button
           className="topbar-icon relative"
           style={{ color: 'var(--gray2)' }}
-          onClick={() => count > 0 && setView('cart')}
+          onClick={() => setView('cart')}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-[22px] h-[22px]">
             <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
