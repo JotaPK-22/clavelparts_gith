@@ -166,7 +166,10 @@ export async function fetchProductDetail(id: string): Promise<ProductDetail> {
     `Repuesto ${product.producto ?? 'sin descripcion'} para ${groupName.toLowerCase()}. La ficha tecnica se completa automaticamente desde Supabase a medida que cargues informacion detallada en el producto.`
 
   return {
-    id: String(product.id),
+    // vista_catalogo aliasea p.id como product_id (no expone "id" plano).
+    // Usamos numericId (el ID que vino por la URL del detalle) que es la
+    // fuente de verdad y siempre está poblada.
+    id: String(numericId),
     name: product.producto || `Producto ${id}`,
     brand: product.marca_pieza || 'Sin marca',
     sku: product.sku || `SKU-${id}`,

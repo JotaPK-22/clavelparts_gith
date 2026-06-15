@@ -86,12 +86,26 @@ export const useAppStore = create<AppState>((set, get) => ({
   cart: [],
 
   addToCart: (product) => {
+    // Defensa: si el id viene vacío, undefined, "undefined" o "null"
+    // (alguna mal-resolución desde la DB / vista), generamos un id único
+    // ad-hoc así no se acumulan distintos productos en el mismo bucket
+    // del carrito. También logueamos para detectarlo en consola.
+    const rawId = product.id
+    const isBadId = !rawId || rawId === 'undefined' || rawId === 'null'
+    if (isBadId) {
+      console.warn('[cart] addToCart recibió un id inválido — generando uno único.', product)
+    }
+    const safeId = isBadId
+      ? `nope-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      : rawId
+    const safeProduct = { ...product, id: safeId }
+
     const { cart } = get()
-    const existing = cart.find((p) => p.id === product.id)
+    const existing = cart.find((p) => p.id === safeProduct.id)
     if (existing) {
-      set({ cart: cart.map((p) => p.id === product.id ? { ...p, qty: p.qty + 1 } : p) })
+      set({ cart: cart.map((p) => p.id === safeProduct.id ? { ...p, qty: p.qty + 1 } : p) })
     } else {
-      set({ cart: [...cart, { ...product, qty: 1 }] })
+      set({ cart: [...cart, { ...safeProduct, qty: 1 }] })
     }
   },
 
